@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  --cell-size: 48px;
+  --cell-size-sm: 44px;
+  --cell-bg: #f1f5f9;
+  --cell-bg-selected: #38bdf8;
+  --cell-bg-highlight: #cbd5e1;
+  --cell-bg-same-value: #86efac;
+  --cell-text-initial: #0f172a;
+  --cell-text-placed: #2563eb;
+  --cell-text-mistake: #e11d48;
+  --cell-text-selected: #ffffff;
+  --cell-note-text: #475569;
+  --border-thin: 1px solid #94a3b8;
+  --border-thick: 3px solid #1e293b;
+  --border-outer: 3px solid #1e293b;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(140deg, #1e293b, #334155, #1e293b);
+  color: #e2e8f0;
+}

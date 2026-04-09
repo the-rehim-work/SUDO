@@ -1,0 +1,55 @@
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @db.NVarChar(50)
+  passwordHash String   @db.NVarChar(255)
+  createdAt    DateTime @default(now())
+  games        Game[]
+  scores       Score[]
+
+  @@index([username])
+}
+
+model Game {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id])
+  gameType        String   @db.NVarChar(10)
+  difficulty      String   @db.NVarChar(10)
+  puzzle          String   @db.NVarChar(Max)
+  solution        String   @db.NVarChar(Max)
+  currentState    String   @db.NVarChar(Max)
+  notes           String   @db.NVarChar(Max)
+  cages           String?  @db.NVarChar(Max)
+  timeSeconds     Int      @default(0)
+  mistakesEnabled Boolean  @default(false)
+  isCompleted     Boolean  @default(false)
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
+
+  @@index([userId, isCompleted])
+  @@index([userId, startedAt])
+}
+
+model Score {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id])
+  username        String   @db.NVarChar(50)
+  gameType        String   @db.NVarChar(10)
+  difficulty      String   @db.NVarChar(10)
+  timeSeconds     Int
+  mistakesEnabled Boolean  @default(false)
+  completedAt     DateTime @default(now())
+
+  @@index([gameType, difficulty, mistakesEnabled, timeSeconds])
+  @@index([userId, gameType, difficulty])
+}
