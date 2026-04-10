@@ -7,8 +7,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "prisma generate"
+    "lint": "eslint .",
+    "postinstall": "dotenv -e .env.local -- prisma generate",
+    "prisma:generate": "dotenv -e .env.local -- prisma generate",
+    "prisma:migrate": "dotenv -e .env.local -- prisma migrate dev",
+    "prisma:deploy": "dotenv -e .env.local -- prisma migrate deploy",
+    "prisma:seed": "dotenv -e .env.local -- tsx prisma/seed.ts",
+    "prisma:studio": "dotenv -e .env.local -- prisma studio"
   },
   "repository": {
     "type": "git",
@@ -40,10 +45,12 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.27",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.3",
     "postcss": "^8.5.9",
     "tailwindcss": "^4.2.2",
+    "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   }
 }

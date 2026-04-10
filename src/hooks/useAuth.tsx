@@ -23,16 +23,11 @@ function setToken(token: string | null) {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setTokenState] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [token, setTokenState] = useState<string | null>(() => (typeof window === "undefined" ? null : localStorage.getItem("token")));
+  const [loading, setLoading] = useState<boolean>(() => !!(typeof window !== "undefined" && localStorage.getItem("token")));
 
   useEffect(() => {
-    const local = localStorage.getItem("token");
-    setTokenState(local);
-    if (!local) {
-      setLoading(false);
-      return;
-    }
+    if (!token) return;
     apiClient
       .get<{ user: User }>("/api/auth/me")
       .then((res) => setUser(res.user))
@@ -41,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setTokenState(null);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [token]);
 
   const login = async (username: string, password: string) => {
     const res = await apiClient.post<{ token: string; user: User }>("/api/auth/login", { username, password });

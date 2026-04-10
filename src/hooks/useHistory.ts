@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 export interface HistoryEntry {
   board: number[][];
@@ -17,19 +17,19 @@ export function useHistory() {
     setFuture([]);
   };
 
-  const undo = (): HistoryEntry | null => {
+  const undo = (current: HistoryEntry): HistoryEntry | null => {
     if (!past.length) return null;
     const previous = past[past.length - 1];
     setPast((prev) => prev.slice(0, -1));
-    setFuture((prev) => [previous, ...prev]);
+    setFuture((prev) => [current, ...prev]);
     return previous;
   };
 
-  const redo = (): HistoryEntry | null => {
+  const redo = (current: HistoryEntry): HistoryEntry | null => {
     if (!future.length) return null;
     const next = future[0];
     setFuture((prev) => prev.slice(1));
-    setPast((prev) => [...prev.slice(-MAX_STACK + 1), next]);
+    setPast((prev) => [...prev.slice(-MAX_STACK + 1), current]);
     return next;
   };
 
@@ -38,15 +38,12 @@ export function useHistory() {
     setFuture([]);
   };
 
-  return useMemo(
-    () => ({
-      pushState,
-      undo,
-      redo,
-      clear,
-      canUndo: past.length > 0,
-      canRedo: future.length > 0,
-    }),
-    [past.length, future.length],
-  );
+  return {
+    pushState,
+    undo,
+    redo,
+    clear,
+    canUndo: past.length > 0,
+    canRedo: future.length > 0,
+  };
 }

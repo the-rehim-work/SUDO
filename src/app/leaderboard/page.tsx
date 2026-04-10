@@ -1,25 +1,38 @@
-import { headers } from "next/headers";
-import { prisma } from "@/lib/prisma";
+"use client";
 
-export default async function LeaderboardPage() {
-  const auth = (await headers()).get("authorization");
-  const scores = await prisma.score.findMany({
-    where: { gameType: "sudoku", difficulty: "easy", mistakesEnabled: false },
-    orderBy: [{ timeSeconds: "asc" }, { completedAt: "asc" }],
-    take: 20,
-  });
+import { useEffect, useState } from "react";
+import { LeaderboardFilters } from "@/components/leaderboard/LeaderboardFilters";
+import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
+import { apiClient } from "@/lib/api-client";
+import type { Difficulty, GameMode, LeaderboardEntry } from "@/types";
+
+export default function LeaderboardPage() {
+  const [mode, setMode] = useState<GameMode>("sudoku");
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const [mistakesEnabled, setMistakesEnabled] = useState(false);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+
+  useEffect(() => {
+    apiClient
+      .get<{ entries: LeaderboardEntry[] }>(`/api/leaderboard?gameType=${mode}&difficulty=${difficulty}&mistakesEnabled=${mistakesEnabled}`)
+      .then((res) => setEntries(res.entries))
+      .catch(() => setEntries([]));
+  }, [mode, difficulty, mistakesEnabled]);
 
   return (
     <main className="mx-auto max-w-2xl p-6">
       <h1 className="mb-4 text-3xl font-semibold">Leaderboard</h1>
-      <p className="mb-3 text-sm text-slate-400">Auth header present: {auth ? "yes" : "no"}</p>
-      <div className="space-y-2">
-        {scores.map((score, index) => (
-          <div className="rounded-lg bg-slate-800/60 px-4 py-3" key={`${score.id}`}>
-            #{index + 1} {score.username} - {score.timeSeconds}s
-          </div>
-        ))}
-      </div>
+      <LeaderboardFilters
+        difficulty={difficulty}
+        mistakesEnabled={mistakesEnabled}
+        mode={mode}
+        onChange={(v) => {
+          setMode(v.mode);
+          setDifficulty(v.difficulty);
+          setMistakesEnabled(v.mistakesEnabled);
+        }}
+      />
+      <LeaderboardTable entries={entries} />
     </main>
   );
 }

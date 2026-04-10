@@ -4,6 +4,7 @@ import { apiClient } from "@/lib/api-client";
 export function useTimer(gameId: number | null) {
   const [elapsed, setElapsed] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
   const startRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -20,9 +21,10 @@ export function useTimer(gameId: number | null) {
   return {
     elapsed,
     isRunning,
-    startTime: startRef.current,
+    startTime,
     start: () => {
       startRef.current = Date.now();
+      setStartTime(startRef.current);
       setIsRunning(true);
     },
     pause: () => setIsRunning(false),
@@ -30,6 +32,7 @@ export function useTimer(gameId: number | null) {
       setElapsed(0);
       setIsRunning(false);
       startRef.current = null;
+      setStartTime(null);
     },
     setElapsed,
   };
