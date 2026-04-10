@@ -9,6 +9,7 @@ export interface CageInfo {
   borderRight: boolean;
   borderBottom: boolean;
   borderLeft: boolean;
+  sumStatus: "incomplete" | "correct" | "incorrect";
 }
 
 interface CellProps {
@@ -25,6 +26,10 @@ interface CellProps {
   onClick: () => void;
   style?: CSSProperties;
   cageInfo?: CageInfo | null;
+}
+
+function cageBorder(show: boolean, color: string) {
+  return show ? `1.5px dashed color-mix(in srgb, ${color} 75%, transparent)` : "none";
 }
 
 export function Cell(props: CellProps) {
@@ -50,9 +55,9 @@ export function Cell(props: CellProps) {
   } else if (isSameValue) {
     bg = "var(--cell-bg-same-value)";
   } else if (isSameRow || isSameCol || isSameBox) {
-    bg = cageInfo ? `color-mix(in srgb, ${cageInfo.color} 12%, rgba(148,163,184,0.08))` : "var(--cell-bg-highlight)";
+    bg = cageInfo ? `color-mix(in srgb, ${cageInfo.color} 28%, rgba(148,163,184,0.08))` : "var(--cell-bg-highlight)";
   } else if (cageInfo) {
-    bg = `color-mix(in srgb, ${cageInfo.color} 10%, transparent)`;
+    bg = `color-mix(in srgb, ${cageInfo.color} 22%, transparent)`;
   } else {
     bg = "var(--cell-bg)";
   }
@@ -62,6 +67,12 @@ export function Cell(props: CellProps) {
   else if (isMistake || isConflict) textColor = "var(--cell-text-mistake)";
   else if (isInitial) textColor = "var(--cell-text-initial)";
   else textColor = "var(--cell-text-placed)";
+
+  let sumColor = cageInfo?.color ?? "";
+  if (cageInfo?.isLabel) {
+    if (cageInfo.sumStatus === "correct") sumColor = "#4ade80";
+    else if (cageInfo.sumStatus === "incorrect") sumColor = "#fb7185";
+  }
 
   return (
     <button
@@ -79,10 +90,10 @@ export function Cell(props: CellProps) {
         <div
           className="pointer-events-none absolute inset-0"
           style={{
-            borderTop: cageInfo.borderTop ? `1.5px dashed color-mix(in srgb, ${cageInfo.color} 55%, transparent)` : "none",
-            borderRight: cageInfo.borderRight ? `1.5px dashed color-mix(in srgb, ${cageInfo.color} 55%, transparent)` : "none",
-            borderBottom: cageInfo.borderBottom ? `1.5px dashed color-mix(in srgb, ${cageInfo.color} 55%, transparent)` : "none",
-            borderLeft: cageInfo.borderLeft ? `1.5px dashed color-mix(in srgb, ${cageInfo.color} 55%, transparent)` : "none",
+            borderTop: cageBorder(cageInfo.borderTop, cageInfo.color),
+            borderRight: cageBorder(cageInfo.borderRight, cageInfo.color),
+            borderBottom: cageBorder(cageInfo.borderBottom, cageInfo.color),
+            borderLeft: cageBorder(cageInfo.borderLeft, cageInfo.color),
           }}
         />
       )}
@@ -92,7 +103,7 @@ export function Cell(props: CellProps) {
           className="pointer-events-none absolute top-[1px] left-[3px] font-bold leading-none"
           style={{
             fontSize: "clamp(7px, calc(var(--cell-size) * 0.19), 10px)",
-            color: `color-mix(in srgb, ${cageInfo.color} 80%, white)`,
+            color: sumColor,
           }}
         >
           {cageInfo.sum}

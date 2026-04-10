@@ -36,8 +36,8 @@ export function AuthModal({ onClose }: AuthModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-6 text-center">
-          <h2 className="text-xl font-bold text-slate-100">{isSignIn ? "Welcome back" : "Create account"}</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <h2 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{isSignIn ? "Welcome back" : "Create account"}</h2>
+          <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
             {isSignIn ? "Sign in to track your progress" : "Join to save scores & compete"}
           </p>
         </div>
@@ -75,7 +75,8 @@ export function AuthModal({ onClose }: AuthModalProps) {
         </button>
 
         <button
-          className="mt-3 w-full rounded-xl py-2.5 text-sm text-slate-400 transition-colors hover:text-slate-200"
+          className="mt-3 w-full rounded-xl py-2.5 text-sm transition-colors hover:opacity-90"
+          style={{ color: "var(--text-muted)" }}
           onClick={() => { setIsSignIn((v) => !v); setError(""); }}
           type="button"
         >
@@ -83,7 +84,8 @@ export function AuthModal({ onClose }: AuthModalProps) {
         </button>
 
         <button
-          className="mt-1 w-full rounded-xl py-2 text-xs text-slate-600 transition-colors hover:text-slate-400"
+          className="mt-1 w-full rounded-xl py-2 text-xs transition-colors hover:opacity-90"
+          style={{ color: "var(--text-faint)" }}
           onClick={onClose}
           type="button"
         >

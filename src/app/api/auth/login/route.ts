@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({
-    token: signToken(user.id, user.username),
+    token: await signToken(user.id, user.username),
     user: { id: user.id, username: user.username },
   });
 }

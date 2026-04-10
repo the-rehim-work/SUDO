@@ -6,7 +6,7 @@ import { generateKillerSudoku } from "@/lib/killer-generator";
 import type { Difficulty, GameMode } from "@/types";
 
 export async function POST(request: Request) {
-  const authUser = getAuthUser(request);
+  const authUser = await getAuthUser(request);
   if (!authUser) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
 
   const { gameType, difficulty, mistakesEnabled = false } = (await request.json()) as {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiClient } from "@/lib/api-client";
 import { hasConflict } from "@/lib/validator";
 import type { CompletionResult, Difficulty, GameData, GameMode, KillerCage } from "@/types";
@@ -20,10 +20,47 @@ export function useGame() {
   const [gameType, setGameType] = useState<GameMode>("sudoku");
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [completionResult, setCompletionResult] = useState<CompletionResult | null>(null);
-  const [timeSeconds, setTimeSeconds] = useState(0);
   const history = useHistory();
 
+  const gameIdRef = useRef<number | null>(null);
+  const isCompletedRef = useRef(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestStateRef = useRef<{ board: number[][]; notes: number[][][] } | null>(null);
+  const timeSecondsRef = useRef(0);
+
+  gameIdRef.current = gameId;
+  isCompletedRef.current = isCompleted;
+
+  const syncElapsedForSave = useCallback((seconds: number) => {
+    timeSecondsRef.current = seconds;
+  }, []);
+
+  const saveProgress = (nextBoard: number[][], nextNotes: number[][][]) => {
+    if (!gameId || isCompleted) return;
+    latestStateRef.current = { board: nextBoard, notes: nextNotes };
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      const state = latestStateRef.current;
+      const gid = gameIdRef.current;
+      if (!state || !gid || isCompletedRef.current) return;
+      const timeSeconds = timeSecondsRef.current;
+      apiClient.put(`/api/game/${gid}`, {
+        currentState: state.board,
+        notes: state.notes,
+        timeSeconds,
+      }).catch(() => undefined);
+      latestStateRef.current = null;
+    }, 2000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, []);
+
   const loadGame = (data: GameData) => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     setGameId(data.gameId);
     setBoard(data.currentState);
     setPuzzle(data.puzzle);
@@ -33,13 +70,13 @@ export function useGame() {
     setIsCompleted(data.isCompleted);
     setGameType(data.gameType);
     setDifficulty(data.difficulty);
-    setTimeSeconds(data.timeSeconds);
     setMistakes(new Set());
     setCompletionResult(null);
     history.clear();
   };
 
   const startNewGame = async (mode: GameMode, diff: Difficulty, mistakesOn: boolean) => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     const data = await apiClient.post<{ gameId: number; puzzle: number[][]; cages?: KillerCage[] }>("/api/game/new", {
       gameType: mode,
       difficulty: diff,
@@ -56,15 +93,9 @@ export function useGame() {
     setIsCompleted(false);
     setMistakes(new Set());
     setCompletionResult(null);
-    setTimeSeconds(0);
     setSelectedCell(null);
     setIsNoteMode(false);
     history.clear();
-  };
-
-  const saveProgress = async (nextBoard: number[][], nextNotes: number[][][]) => {
-    if (!gameId || isCompleted) return;
-    await apiClient.put(`/api/game/${gameId}`, { currentState: nextBoard, notes: nextNotes, timeSeconds });
   };
 
   const placeNumber = async (num: number) => {
@@ -90,26 +121,23 @@ export function useGame() {
       nextBoard[row][col] = num;
       nextNotes[row][col] = [];
       if (mistakesEnabled && gameId) {
-        const moveRes = await apiClient.post<{ correct?: boolean; accepted?: boolean }>(`/api/game/${gameId}/move`, { row, col, value: num });
-        if (moveRes.correct === false) setMistakes((prev) => new Set([...prev, `${row}-${col}`]));
-        else setMistakes((prev) => {
-          const clone = new Set(prev);
-          clone.delete(`${row}-${col}`);
-          return clone;
-        });
+        try {
+          const moveRes = await apiClient.post<{ correct?: boolean; accepted?: boolean }>(`/api/game/${gameId}/move`, { row, col, value: num });
+          if (moveRes.correct === false) setMistakes((prev) => new Set([...prev, `${row}-${col}`]));
+          else setMistakes((prev) => { const c = new Set(prev); c.delete(`${row}-${col}`); return c; });
+        } catch { /* move validation failed, proceed */ }
       }
     }
 
     setBoard(nextBoard);
     setNotes(nextNotes);
-    await saveProgress(nextBoard, nextNotes);
+    saveProgress(nextBoard, nextNotes);
   };
 
-  const clearCell = async () => {
+  const clearCell = () => {
     if (!selectedCell || isCompleted) return;
     const [row, col] = selectedCell;
     if (puzzle[row][col] !== 0) return;
-
     if (board[row][col] === 0 && notes[row][col].length === 0) return;
 
     const prevBoard = board.map((r) => [...r]);
@@ -123,36 +151,37 @@ export function useGame() {
 
     setBoard(nextBoard);
     setNotes(nextNotes);
-    await saveProgress(nextBoard, nextNotes);
+    saveProgress(nextBoard, nextNotes);
   };
 
-  const clearAll = async () => {
+  const clearAll = () => {
     history.pushState({ board: board.map((r) => [...r]), notes: notes.map((r) => r.map((c) => [...c])), action: "clearAll" });
     const nextBoard = puzzle.map((r) => [...r]);
     const nextNotes = Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => [] as number[]));
     setBoard(nextBoard);
     setNotes(nextNotes);
-    await saveProgress(nextBoard, nextNotes);
+    saveProgress(nextBoard, nextNotes);
   };
 
-  const undo = async () => {
+  const undo = () => {
     const previous = history.undo({ board: board.map((r) => [...r]), notes: notes.map((r) => r.map((c) => [...c])), action: "undoCurrent" });
     if (!previous) return;
     setBoard(previous.board.map((r) => [...r]));
     setNotes(previous.notes.map((r) => r.map((c) => [...c])));
-    await saveProgress(previous.board, previous.notes);
+    saveProgress(previous.board, previous.notes);
   };
 
-  const redo = async () => {
+  const redo = () => {
     const next = history.redo({ board: board.map((r) => [...r]), notes: notes.map((r) => r.map((c) => [...c])), action: "redoCurrent" });
     if (!next) return;
     setBoard(next.board.map((r) => [...r]));
     setNotes(next.notes.map((r) => r.map((c) => [...c])));
-    await saveProgress(next.board, next.notes);
+    saveProgress(next.board, next.notes);
   };
 
   const completeGame = async (elapsed: number) => {
     if (!gameId || isCompleted) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     const result = await apiClient.post<CompletionResult>(`/api/game/${gameId}/complete`, { currentState: board, timeSeconds: elapsed });
     setCompletionResult(result);
     setIsCompleted(result.valid);
@@ -172,8 +201,6 @@ export function useGame() {
     gameType,
     difficulty,
     completionResult,
-    timeSeconds,
-    setTimeSeconds,
     selectCell: (row: number, col: number) => setSelectedCell([row, col]),
     clearAll,
     clearCell,
@@ -197,5 +224,6 @@ export function useGame() {
     }, [board]),
     selectedValue: selectedCell ? board[selectedCell[0]][selectedCell[1]] : null,
     setCompletionResult,
+    syncElapsedForSave,
   };
 }

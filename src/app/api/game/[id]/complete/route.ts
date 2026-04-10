@@ -10,6 +10,24 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (result.game.isCompleted) return NextResponse.json({ error: "Game already completed" }, { status: 400 });
 
   const { currentState, timeSeconds } = (await request.json()) as { currentState: number[][]; timeSeconds: number };
+
+  if (!Array.isArray(currentState) || currentState.length !== 9) {
+    return NextResponse.json({ error: "Invalid board" }, { status: 400 });
+  }
+  for (const row of currentState) {
+    if (!Array.isArray(row) || row.length !== 9) {
+      return NextResponse.json({ error: "Invalid board" }, { status: 400 });
+    }
+    for (const v of row) {
+      if (typeof v !== "number" || v < 0 || v > 9) {
+        return NextResponse.json({ error: "Invalid board" }, { status: 400 });
+      }
+    }
+  }
+  if (typeof timeSeconds !== "number" || timeSeconds < 0) {
+    return NextResponse.json({ error: "Invalid time" }, { status: 400 });
+  }
+
   const solution = JSON.parse(result.game.solution) as number[][];
   const valid = validateCompletion(currentState, solution);
   if (!valid) return NextResponse.json({ valid: false, timeSeconds }, { status: 400 });

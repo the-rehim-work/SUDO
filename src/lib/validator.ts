@@ -32,3 +32,10 @@ export function hasConflict(board: number[][], row: number, col: number): boolea
 
   return false;
 }
+
+export function isValidBoard(board: unknown): board is number[][] {
+  if (!Array.isArray(board) || board.length !== 9) return false;
+  return board.every(
+    (row) => Array.isArray(row) && row.length === 9 && row.every((v) => typeof v === "number" && v >= 0 && v <= 9),
+  );
+}

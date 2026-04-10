@@ -24,7 +24,7 @@ export default function HomePage() {
 
   return (
     <main className="relative mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center gap-8 px-5 py-10">
-      <div className="animate-fade-in-up absolute top-5 right-5 left-5 flex items-center justify-end">
+      <div className="animate-fade-in absolute top-5 right-5 left-5 flex items-center justify-end">
         {loading ? null : user ? (
           <div className="glass flex items-center gap-3 rounded-full py-2 pr-2 pl-4">
             <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export default function HomePage() {
         )}
       </div>
 
-      <MainMenu authenticated={!!user} hasActiveGame={hasActiveGame} />
+      <MainMenu authenticated={!!user} hasActiveGame={hasActiveGame} onSignIn={() => setShowAuth(true)} />
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </main>

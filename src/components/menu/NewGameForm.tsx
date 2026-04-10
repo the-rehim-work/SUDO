@@ -22,21 +22,25 @@ export function NewGameForm(props: NewGameFormProps) {
 
   return (
     <div className="animate-fade-in-up glass-strong w-full rounded-2xl p-6">
-      <h2 className="mb-6 text-center text-xl font-bold text-slate-100">New Game</h2>
+      <h2 className="mb-6 text-center text-xl font-bold" style={{ color: "var(--text-primary)" }}>New Game</h2>
 
       <div className="mb-6">
-        <label className="mb-2 block text-xs font-medium tracking-wider text-slate-500 uppercase">Mode</label>
+        <label className="mb-2 block text-xs font-medium tracking-wider uppercase" style={{ color: "var(--text-muted)" }}>Mode</label>
         <div className="grid grid-cols-2 gap-3">
           <button
             className={`group relative flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
               mode === "sudoku"
                 ? "border-cyan-500/40 bg-cyan-500/10"
-                : "border-white/5 bg-white/[0.03] hover:border-white/10 hover:bg-white/[0.06]"
+                : "border"
             }`}
+            style={mode === "sudoku" ? undefined : { background: "var(--btn-ghost-bg)", borderColor: "var(--btn-ghost-border)" }}
             onClick={() => onModeChange("sudoku")}
             type="button"
           >
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${mode === "sudoku" ? "bg-cyan-500/20 text-cyan-400" : "bg-white/5 text-slate-500"}`}>
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-lg ${mode === "sudoku" ? "bg-cyan-500/20 text-cyan-400" : ""}`}
+              style={mode === "sudoku" ? undefined : { background: "var(--btn-ghost-bg)", color: "var(--text-muted)" }}
+            >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <rect x="2" y="2" width="16" height="16" rx="2" />
                 <line x1="7.33" y1="2" x2="7.33" y2="18" />
@@ -45,34 +49,38 @@ export function NewGameForm(props: NewGameFormProps) {
                 <line x1="2" y1="12.67" x2="18" y2="12.67" />
               </svg>
             </div>
-            <span className={`text-sm font-semibold ${mode === "sudoku" ? "text-cyan-300" : "text-slate-400"}`}>Classic</span>
-            <span className="text-[11px] text-slate-600">Standard rules</span>
+            <span className={`text-sm font-semibold ${mode === "sudoku" ? "text-cyan-300" : ""}`} style={mode === "sudoku" ? undefined : { color: "var(--text-muted)" }}>Classic</span>
+            <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>Standard rules</span>
           </button>
 
           <button
             className={`group relative flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
               mode === "killer"
                 ? "border-violet-500/40 bg-violet-500/10"
-                : "border-white/5 bg-white/[0.03] hover:border-white/10 hover:bg-white/[0.06]"
+                : "border"
             }`}
+            style={mode === "killer" ? undefined : { background: "var(--btn-ghost-bg)", borderColor: "var(--btn-ghost-border)" }}
             onClick={() => onModeChange("killer")}
             type="button"
           >
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${mode === "killer" ? "bg-violet-500/20 text-violet-400" : "bg-white/5 text-slate-500"}`}>
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-lg ${mode === "killer" ? "bg-violet-500/20 text-violet-400" : ""}`}
+              style={mode === "killer" ? undefined : { background: "var(--btn-ghost-bg)", color: "var(--text-muted)" }}
+            >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2">
                 <rect x="2" y="2" width="16" height="16" rx="2" />
                 <path d="M6 2v8h8V2" />
                 <path d="M2 10h6v8" />
               </svg>
             </div>
-            <span className={`text-sm font-semibold ${mode === "killer" ? "text-violet-300" : "text-slate-400"}`}>Killer</span>
-            <span className="text-[11px] text-slate-600">Cages with sums</span>
+            <span className={`text-sm font-semibold ${mode === "killer" ? "text-violet-300" : ""}`} style={mode === "killer" ? undefined : { color: "var(--text-muted)" }}>Killer</span>
+            <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>Cages with sums</span>
           </button>
         </div>
       </div>
 
       <div className="mb-6">
-        <label className="mb-2 block text-xs font-medium tracking-wider text-slate-500 uppercase">Difficulty</label>
+        <label className="mb-2 block text-xs font-medium tracking-wider uppercase" style={{ color: "var(--text-muted)" }}>Difficulty</label>
         <div className="flex gap-2">
           {DIFFICULTIES.map((d) => {
             const active = difficulty === d.value;
@@ -85,9 +93,8 @@ export function NewGameForm(props: NewGameFormProps) {
             return (
               <button
                 key={d.value}
-                className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
-                  active ? colorMap[d.color] : "border-white/5 bg-white/[0.03] text-slate-500 hover:bg-white/[0.06]"
-                }`}
+                className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-all ${active ? colorMap[d.color] : ""}`}
+                style={!active ? { background: "var(--btn-ghost-bg)", borderColor: "var(--btn-ghost-border)", color: "var(--text-muted)" } : undefined}
                 onClick={() => onDifficultyChange(d.value)}
                 type="button"
               >
@@ -106,8 +113,8 @@ export function NewGameForm(props: NewGameFormProps) {
             type="checkbox"
           />
           <div>
-            <div className="text-sm font-medium text-slate-200">Track mistakes</div>
-            <div className="text-xs text-slate-600">Highlights incorrect placements</div>
+            <div className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Track mistakes</div>
+            <div className="text-xs" style={{ color: "var(--text-faint)" }}>Highlights incorrect placements</div>
           </div>
         </label>
       </div>

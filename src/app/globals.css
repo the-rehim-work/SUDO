@@ -1,6 +1,17 @@
 @import "tailwindcss";
 
 :root {
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
+  --card-bg: rgba(255, 255, 255, 0.06);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --btn-ghost-bg: rgba(255, 255, 255, 0.06);
+  --btn-ghost-border: rgba(255, 255, 255, 0.08);
+  --bg-surface: rgba(255, 255, 255, 0.04);
+  --bg-surface-strong: rgba(255, 255, 255, 0.07);
+
   --cell-size: min(52px, calc((100vw - 40px) / 9));
 
   --cell-bg: rgba(15, 23, 42, 0.6);
@@ -16,6 +27,19 @@
   --border-thin: 1px solid rgba(148, 163, 184, 0.12);
   --border-thick: 2px solid rgba(148, 163, 184, 0.35);
   --border-outer: 2px solid rgba(148, 163, 184, 0.45);
+}
+
+[data-theme="light"] {
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
+  --card-bg: rgba(15, 23, 42, 0.04);
+  --card-border: rgba(15, 23, 42, 0.12);
+  --btn-ghost-bg: rgba(15, 23, 42, 0.05);
+  --btn-ghost-border: rgba(15, 23, 42, 0.12);
+  --bg-surface: rgba(15, 23, 42, 0.03);
+  --bg-surface-strong: rgba(15, 23, 42, 0.06);
 }
 
 * {
@@ -214,6 +238,13 @@ body::before {
   box-shadow:
     0 0 40px rgba(139, 92, 246, 0.12),
     0 0 80px rgba(139, 92, 246, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.board-glow-amber {
+  box-shadow:
+    0 0 40px rgba(251, 191, 36, 0.1),
+    0 0 80px rgba(251, 191, 36, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 

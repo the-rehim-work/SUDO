@@ -15,9 +15,10 @@ interface SudokuBoardProps {
   hasConflict: (row: number, col: number) => boolean;
   cages?: KillerCage[];
   gameType?: GameMode;
+  isNoteMode?: boolean;
 }
 
-function buildCageMap(cages: KillerCage[]): (CageInfo | null)[][] {
+function buildCageMap(cages: KillerCage[], board: number[][]): (CageInfo | null)[][] {
   const map: (CageInfo | null)[][] = Array.from({ length: 9 }, () => Array(9).fill(null));
 
   for (let ci = 0; ci < cages.length; ci++) {
@@ -34,6 +35,13 @@ function buildCageMap(cages: KillerCage[]): (CageInfo | null)[][] {
       }
     }
 
+    const filledValues = cage.cells.map(([r, c]) => board[r][c]).filter((v) => v !== 0);
+    let sumStatus: "incomplete" | "correct" | "incorrect" = "incomplete";
+    if (filledValues.length === cage.cells.length) {
+      const actual = filledValues.reduce((a, b) => a + b, 0);
+      sumStatus = actual === cage.sum ? "correct" : "incorrect";
+    }
+
     for (const [r, c] of cage.cells) {
       map[r][c] = {
         cageIndex: ci,
@@ -44,6 +52,7 @@ function buildCageMap(cages: KillerCage[]): (CageInfo | null)[][] {
         borderBottom: !cellSet.has(`${r + 1}-${c}`),
         borderLeft: !cellSet.has(`${r}-${c - 1}`),
         borderRight: !cellSet.has(`${r}-${c + 1}`),
+        sumStatus,
       };
     }
   }
@@ -52,14 +61,18 @@ function buildCageMap(cages: KillerCage[]): (CageInfo | null)[][] {
 }
 
 export function SudokuBoard(props: SudokuBoardProps) {
-  const { board, puzzle, notes, selectedCell, mistakes, selectedValue, onCellClick, hasConflict, cages, gameType } = props;
+  const { board, puzzle, notes, selectedCell, mistakes, selectedValue, onCellClick, hasConflict, cages, gameType, isNoteMode } = props;
   const isKiller = gameType === "killer";
 
-  const cageMap = useMemo(() => (cages && cages.length > 0 ? buildCageMap(cages) : null), [cages]);
+  const cageMap = useMemo(() => (cages && cages.length > 0 ? buildCageMap(cages, board) : null), [cages, board]);
+
+  let glowClass = "board-glow-cyan";
+  if (isNoteMode) glowClass = "board-glow-amber";
+  else if (isKiller) glowClass = "board-glow-violet";
 
   return (
     <div
-      className={`grid grid-cols-9 overflow-hidden rounded-xl ${isKiller ? "board-glow-violet" : "board-glow-cyan"}`}
+      className={`grid grid-cols-9 overflow-hidden rounded-xl transition-shadow duration-300 ${glowClass}`}
       style={{ border: "var(--border-outer)" }}
     >
       {board.map((row, rowIndex) =>

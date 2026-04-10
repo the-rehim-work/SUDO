@@ -20,5 +20,5 @@ export async function POST(request: Request) {
     select: { id: true, username: true },
   });
 
-  return NextResponse.json({ token: signToken(user.id, user.username), user });
+  return NextResponse.json({ token: await signToken(user.id, user.username), user });
 }

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 
 export async function GET(request: Request) {
-  const authUser = getAuthUser(request);
+  const authUser = await getAuthUser(request);
   if (!authUser) return NextResponse.json({ error: "Authentication required" }, { status: 401 });
 
   const game = await prisma.game.findFirst({

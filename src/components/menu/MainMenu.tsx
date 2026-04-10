@@ -3,6 +3,7 @@ import Link from "next/link";
 interface MainMenuProps {
   hasActiveGame: boolean;
   authenticated: boolean;
+  onSignIn: () => void;
 }
 
 function ArrowIcon() {
@@ -13,7 +14,7 @@ function ArrowIcon() {
   );
 }
 
-export function MainMenu({ hasActiveGame, authenticated }: MainMenuProps) {
+export function MainMenu({ hasActiveGame, authenticated, onSignIn }: MainMenuProps) {
   return (
     <div className="flex w-full max-w-sm flex-col items-center gap-8">
       <div className="animate-fade-in-up flex flex-col items-center gap-2">
@@ -35,16 +36,18 @@ export function MainMenu({ hasActiveGame, authenticated }: MainMenuProps) {
           </Link>
         )}
 
-        <Link href="/game" className="group glass-strong flex items-center gap-4 rounded-2xl p-4 transition-all hover:border-cyan-500/30 hover:bg-cyan-500/10">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-400 transition-colors group-hover:bg-cyan-500/25">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5v12M5 11h12" /></svg>
-          </div>
-          <div className="flex-1">
-            <div className="font-semibold text-slate-100">New Game</div>
-            <div className="text-xs text-slate-500">Classic or Killer Sudoku</div>
-          </div>
-          <ArrowIcon />
-        </Link>
+        {authenticated ? (
+          <Link href="/game" className="group glass-strong flex items-center gap-4 rounded-2xl p-4 transition-all hover:border-cyan-500/30 hover:bg-cyan-500/10">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-400 transition-colors group-hover:bg-cyan-500/25">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5v12M5 11h12" /></svg>
+            </div>
+            <div className="flex-1">
+              <div className="font-semibold text-slate-100">New Game</div>
+              <div className="text-xs text-slate-500">Classic or Killer Sudoku</div>
+            </div>
+            <ArrowIcon />
+          </Link>
+        ) : null}
 
         <Link href="/leaderboard" className="group glass-strong flex items-center gap-4 rounded-2xl p-4 transition-all hover:border-amber-500/30 hover:bg-amber-500/10">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400 transition-colors group-hover:bg-amber-500/25">
@@ -74,8 +77,17 @@ export function MainMenu({ hasActiveGame, authenticated }: MainMenuProps) {
             <ArrowIcon />
           </Link>
         ) : (
-          <div className="glass rounded-2xl p-4 text-center text-sm text-slate-500">
-            Sign in to save your progress, view statistics, and compete on the leaderboard.
+          <div className="glass rounded-2xl p-5 text-center">
+            <p className="mb-3 text-sm text-slate-500">
+              Sign in to play, save progress, and compete on the leaderboard.
+            </p>
+            <button
+              className="btn-primary rounded-xl px-6 py-2.5 text-sm font-semibold text-white"
+              onClick={onSignIn}
+              type="button"
+            >
+              Sign In / Register
+            </button>
           </div>
         )}
       </nav>

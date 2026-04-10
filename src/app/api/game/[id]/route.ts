@@ -34,6 +34,26 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     timeSeconds: number;
   };
 
+  if (!Array.isArray(currentState) || currentState.length !== 9) {
+    return NextResponse.json({ error: "Invalid board" }, { status: 400 });
+  }
+  for (const row of currentState) {
+    if (!Array.isArray(row) || row.length !== 9) {
+      return NextResponse.json({ error: "Invalid board" }, { status: 400 });
+    }
+    for (const v of row) {
+      if (typeof v !== "number" || v < 0 || v > 9) {
+        return NextResponse.json({ error: "Invalid board" }, { status: 400 });
+      }
+    }
+  }
+  if (!Array.isArray(notes) || notes.length !== 9) {
+    return NextResponse.json({ error: "Invalid notes" }, { status: 400 });
+  }
+  if (typeof timeSeconds !== "number" || timeSeconds < 0) {
+    return NextResponse.json({ error: "Invalid time" }, { status: 400 });
+  }
+
   await prisma.game.update({
     where: { id: result.game.id },
     data: {

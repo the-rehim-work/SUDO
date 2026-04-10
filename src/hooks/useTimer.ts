@@ -4,13 +4,25 @@ import { apiClient } from "@/lib/api-client";
 export function useTimer(gameId: number | null) {
   const [elapsed, setElapsed] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [startTime, setStartTime] = useState<number | null>(null);
-  const startRef = useRef<number | null>(null);
+  const wasRunningRef = useRef(false);
 
   useEffect(() => {
     if (!isRunning) return;
     const timer = setInterval(() => setElapsed((v) => v + 1), 1000);
     return () => clearInterval(timer);
+  }, [isRunning]);
+
+  useEffect(() => {
+    const handler = () => {
+      if (document.hidden) {
+        wasRunningRef.current = isRunning;
+        setIsRunning(false);
+      } else if (wasRunningRef.current) {
+        setIsRunning(true);
+      }
+    };
+    document.addEventListener("visibilitychange", handler);
+    return () => document.removeEventListener("visibilitychange", handler);
   }, [isRunning]);
 
   useEffect(() => {
@@ -21,18 +33,12 @@ export function useTimer(gameId: number | null) {
   return {
     elapsed,
     isRunning,
-    startTime,
-    start: () => {
-      startRef.current = Date.now();
-      setStartTime(startRef.current);
-      setIsRunning(true);
-    },
+    start: () => setIsRunning(true),
     pause: () => setIsRunning(false),
     reset: () => {
       setElapsed(0);
       setIsRunning(false);
-      startRef.current = null;
-      setStartTime(null);
+      wasRunningRef.current = false;
     },
     setElapsed,
   };

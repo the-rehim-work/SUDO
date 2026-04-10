@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     select: { username: true, timeSeconds: true, completedAt: true, userId: true },
   });
 
-  const authUser = getAuthUser(request);
+  const authUser = await getAuthUser(request);
   let userRank: number | null = null;
   if (authUser) {
     const best = await prisma.score.findFirst({
