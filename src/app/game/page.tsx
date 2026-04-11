@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import Link from "next/link";
 import { NewGameForm } from "@/components/menu/NewGameForm";
 import { SudokuBoard } from "@/components/board/SudokuBoard";
@@ -68,19 +68,26 @@ export default function GamePage() {
     timerStartRef.current();
   }, [game.gameId]);
 
-  useKeyboard({
-    placeNumber: (num) => void game.placeNumber(num),
-    clearCell: () => game.clearCell(),
-    toggleNoteMode: game.toggleNoteMode,
-    undo: () => game.undo(),
-    redo: () => game.redo(),
-    moveSelection: (dr, dc) => {
-      if (!game.selectedCell) return;
-      const [r, c] = game.selectedCell;
-      game.selectCell(Math.max(0, Math.min(8, r + dr)), Math.max(0, Math.min(8, c + dc)));
-    },
-    deselect: game.deselect,
-  });
+  const keyboardHandlers = useMemo(
+    () => ({
+      placeNumber: (num: number) => {
+        game.placeNumber(num).catch(() => undefined);
+      },
+      clearCell: () => game.clearCell(),
+      toggleNoteMode: game.toggleNoteMode,
+      undo: () => game.undo(),
+      redo: () => game.redo(),
+      moveSelection: (dr: number, dc: number) => {
+        if (!game.selectedCell) return;
+        const [r, c] = game.selectedCell;
+        game.selectCell(Math.max(0, Math.min(8, r + dr)), Math.max(0, Math.min(8, c + dc)));
+      },
+      deselect: game.deselect,
+    }),
+    [game],
+  );
+
+  useKeyboard(keyboardHandlers);
 
   const completeGameRef = useRef(game.completeGame);
   completeGameRef.current = game.completeGame;

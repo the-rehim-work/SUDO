@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "test": "echo \"No tests configured\"",
-    "dev": "next dev",
-    "build": "next build",
+    "setup": "dotenv -e .env.local -- prisma generate && dotenv -e .env.local -- prisma migrate deploy",
+    "dev": "npm run setup && next dev",
+    "build": "dotenv -e .env.local -- prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
     "postinstall": "dotenv -e .env.local -- prisma generate",

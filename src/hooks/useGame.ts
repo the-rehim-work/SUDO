@@ -36,18 +36,16 @@ export function useGame() {
   }, []);
 
   const saveProgress = (nextBoard: number[][], nextNotes: number[][][]) => {
-    if (!gameId || isCompleted) return;
     latestStateRef.current = { board: nextBoard, notes: nextNotes };
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       const state = latestStateRef.current;
       const gid = gameIdRef.current;
       if (!state || !gid || isCompletedRef.current) return;
-      const timeSeconds = timeSecondsRef.current;
       apiClient.put(`/api/game/${gid}`, {
         currentState: state.board,
         notes: state.notes,
-        timeSeconds,
+        timeSeconds: timeSecondsRef.current,
       }).catch(() => undefined);
       latestStateRef.current = null;
     }, 2000);

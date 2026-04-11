@@ -18,14 +18,17 @@ function streakMetrics(dates: Date[]): { currentStreak: number; longestStreak: n
     if (currentRun > longest) longest = currentRun;
   }
 
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
   let current = 0;
-  const now = new Date();
-  for (let i = 0; i < 3650; i += 1) {
-    const probe = new Date(now);
-    probe.setDate(now.getDate() - i);
-    const key = probe.toISOString().slice(0, 10);
-    if (daySet.has(key)) current += 1;
-    else break;
+
+  if (daySet.has(today) || daySet.has(yesterday)) {
+    const startDate = daySet.has(today) ? today : yesterday;
+    let probe = new Date(startDate);
+    while (daySet.has(probe.toISOString().slice(0, 10))) {
+      current += 1;
+      probe = new Date(probe.getTime() - 86400000);
+    }
   }
 
   return { currentStreak: current, longestStreak: longest };
